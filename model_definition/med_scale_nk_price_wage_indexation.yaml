@@ -143,6 +143,6 @@ steady_state:
       q: 1.
       pitilde: pi
 
-init_guesses:
+  init_guesses:
     chi: 1e+1
     MPK: alpha*mc/20
