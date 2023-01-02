@@ -31,7 +31,9 @@ variables: [
   cap_util, # capital utilization (share of capital which is in use)
   cap_util_costs, # capital utilization costs (costs for installing capital)
   y_prod, # production (as per the production function)
-  pitilde # price change index (price indexation)
+  pitilde, # price change index (price indexation)
+  wtilde, # wage change index (wage indexation)
+  # w_pi # wage inflation
 ]
 parameters: [
   theta, # elasticity of demand
@@ -48,7 +50,9 @@ parameters: [
   rho_beta, # persistence of the discount factor shock
   chi, # affects the level of disutility from working (Gust, page 9)
   par_cap_util1, # parameter on the capital utilization costs
-  omega # parameter which determines the extent to which price indexation is tied to the central bank's inflation target or to the lagged inflation rate (Gust page 8)
+  omega, # parameter which determines the extent to which price indexation is tied to the central bank's inflation target or to the lagged inflation rate (Gust page 8)
+  w_omega, # parameter which determines the extent to which wage indexation is tied to the central bank's inflation target or to the lagged inflation rate (Gust, same as price indexation I assume)
+  g_z # deterministic growth rate
 ]
 shocks: [e_beta]
 
@@ -62,6 +66,7 @@ equations:
     ~ w = chi * n ** eta * (c - h * cLag)
      # Euler equation
     ~ 1 = R / piPrime * hhdf
+    ~ wtilde = g_z * piSS ** w_omega * pi ** (1 - w_omega)
     # budget constraint
     ~ dd + c + t + Phi/2 * (i / iLag - 1)**2 * i = w * n + RLag / pi * ddLag + (1 - mc - psi/2 * (pi / pitildeLag - 1)**2)*y + (q *(1 - Phi/2 * (i/iLag - 1)**2) - 1) * i + bprof
 
@@ -134,6 +139,8 @@ steady_state:
       rho_beta: .8
       par_cap_util1: 0.8
       omega: .44
+      w_omega: .44
+      g_z: .5
 
     # steady state
       beta: 0.995
@@ -142,6 +149,7 @@ steady_state:
       mc: (theta-1)/theta
       q: 1.
       pitilde: pi
+      # wtilde: w_pi
 
   init_guesses:
     chi: 1e+1
