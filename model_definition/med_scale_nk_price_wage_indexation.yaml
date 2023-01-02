@@ -6,49 +6,49 @@
 
 name: 'med_scale_nk_price_wage_indexation'
 variables: [
-  y,
-  c,
-  pi,
-  R,
-  Rn,
-  Rk,
-  beta,
-  w,
-  q,
-  mc,
-  k,
-  i,
-  n,
-  hhdf,
-  g,
-  b,
-  qb,
-  t,
-  ds,
-  bprof,
-  dd,
-  MPK,
-  cap_util,
-  cap_util_costs,
-  y_prod,
-  pitilde
+  y, # real output (less volatile)
+  c, # consumption
+  pi, # gross rate of inflation
+  R, # gross nominal interest rate (respects ZLB)
+  Rn, # gross nominal interest rate according to monetary policy rule
+  Rk, # gross rental cost of capital
+  beta, # discount factor
+  w, # real wage(?)
+  q, # value of capital in terms of consumption
+  mc, # real marginal costs
+  k, # capital
+  i, # investment
+  n, # employment
+  hhdf, # household discount factor
+  g, # government spending
+  b, # quantity of government bonds
+  qb, # price of a government bond
+  t, # lump-sum taxes/transfers
+  ds, # deposits at the bank(deposit supply)
+  bprof, # banks profits/dividends
+  dd, # deposit demand(household deposits at the bank?)
+  MPK, # marginal productivity of capital
+  cap_util, # capital utilization (share of capital which is in use)
+  cap_util_costs, # capital utilization costs (costs for installing capital)
+  y_prod, # production (as per the production function)
+  pitilde # price change index (price indexation)
 ]
 parameters: [
-  theta,
-  kappa,
-  psi,
-  delta,
-  alpha,
-  Phi,
-  phi_pi,
-  phi_y,
-  h,
-  rho,
-  eta,
-  rho_beta,
-  chi,
-  par_cap_util1,
-  omega
+  theta, # elasticity of demand
+  kappa, # decay parameter for coupon payments of perpetual bonds
+  psi, # parameter on the costs of price adjustment
+  delta, # depreciation rate
+  alpha, # capital share
+  Phi, # parameter on the capital/investment adjustment costs
+  phi_pi, # Taylor rule coefficient on inflation
+  phi_y, # Taylor rule coefficient on output
+  h, # habit formation
+  rho, # persistence in the Taylor rule
+  eta, # inverse of Frisch elasticity of labor supply
+  rho_beta, # persistence of the discount factor shock
+  chi, # affects the level of disutility from working (Gust, page 9)
+  par_cap_util1, # parameter on the capital utilization costs
+  omega # parameter which determines the extent to which price indexation is tied to the central bank's inflation target or to the lagged inflation rate (Gust page 8)
 ]
 shocks: [e_beta]
 
