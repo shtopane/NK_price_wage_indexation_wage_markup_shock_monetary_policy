@@ -1,0 +1,148 @@
+# Description: 
+# A medium scale NK model with capital, capital adjustment costs, capital utilization costs, habits, and price indexation.
+# The model is inspired by "A Baseline DSGE Model" (Fernández-Villaverde and Rubio-Ramírez, manuscript), by "The zero lower bound, the dual mandate, and unconventional dynamics" (Gavin et al., 2015 JEDC), and the WP version of "The Empirical Implications of the Interest-Rate Lower Bound" (Gust et al, Fed WP 2012-083)
+# Authors: Gregor Boehl [mail@gregorboehl.com], Andreas Koundouros, Krasimira Kirilova
+---
+
+name: 'med_scale_nk_price_wage_indexation'
+variables: [
+  y,
+  c,
+  pi,
+  R,
+  Rn,
+  Rk,
+  beta,
+  w,
+  q,
+  mc,
+  k,
+  i,
+  n,
+  hhdf,
+  g,
+  b,
+  qb,
+  t,
+  ds,
+  bprof,
+  dd,
+  MPK,
+  cap_util,
+  cap_util_costs,
+  y_prod,
+  pitilde
+]
+parameters: [
+  theta,
+  kappa,
+  psi,
+  delta,
+  alpha,
+  Phi,
+  phi_pi,
+  phi_y,
+  h,
+  rho,
+  eta,
+  rho_beta,
+  chi,
+  par_cap_util1,
+  omega
+]
+shocks: [e_beta]
+
+aux_equations: |
+    par_cap_util0 = MPKSS
+  
+equations:
+    # Block households
+    ~ hhdf = betaPrime * (c - h * cLag) / (cPrime - h * c)
+    # labor supply FOC
+    ~ w = chi * n ** eta * (c - h * cLag)
+     # Euler equation
+    ~ 1 = R / piPrime * hhdf
+    # budget constraint
+    ~ dd + c + t + Phi/2 * (i / iLag - 1)**2 * i = w * n + RLag / pi * ddLag + (1 - mc - psi/2 * (pi / pitildeLag - 1)**2)*y + (q *(1 - Phi/2 * (i/iLag - 1)**2) - 1) * i + bprof
+
+    
+    # goods market clearing
+    ~ c + i + g + Phi/2 * (i / iLag - 1)**2 * i + cap_util_costs*kLag = (1 - psi*(pi/pitildeLag - 1)**2/2)*y_prod
+    # "effective output"
+    ~ c + i + g = y
+
+    # Block Firms
+    ~ cap_util_costs = par_cap_util0 * (cap_util - 1) + par_cap_util1 / (1 - par_cap_util1) / 2 * (cap_util - 1)**2
+    ~ MPK = par_cap_util0 + par_cap_util1 / (1 - par_cap_util1) * (cap_util - 1)
+    ~ MPK = alpha * mc * y / (cap_util * kLag)
+    # MPL
+    ~ w = (1 - alpha) * mc * y / n
+    ~ q * Rk / piPrime = MPKPrime * cap_utilPrime + (1 - delta) * qPrime - cap_util_costs
+
+    # capital accumulation
+    ~ k = (1 - delta)*kLag + (1 - Phi/2 * (i/iLag - 1)**2)*i
+    # capital Euler equations
+    ~ 1 = q * (1 - Phi/2 * (i/iLag - 1)**2 - Phi * (i/iLag - 1)*i/iLag) + hhdf * qPrime * Phi * (iPrime/i - 1) * (iPrime/i)**2
+    # price Phillips curve[TODO: Add wage indexation here]
+    ~ psi * (pi/pitildeLag - 1)* pi/pitildeLag = (1 - theta) + theta * mc + psi * hhdf * (piPrime / pitilde - 1) * piPrime/pitilde * yPrime/y
+    # price indexation term
+    ~ pitilde = piSS**omega * pi**(1 - omega)
+    # production function
+    ~ y_prod = (kLag * cap_util)**alpha * n**(1 - alpha)
+
+    # Block "banks"
+    # bank's balance sheet: deposit supply
+    ~ ds = qb*b + q*k
+    # no arbitrage: bond price bia perpetuities
+    ~ R = (1 + kappa * qbPrime) / qb
+    # no arbitrage: rental rate of capital
+    ~ R = Rk
+    # bank profits
+    ~ bprof = ((1 + kappa * qb) * bLag + RkLag * qLag * kLag - RLag *ddLag) / pi
+
+    # Block government
+    # budget constraint
+    ~ g + (1 + kappa * qb) / pi * bLag = qb*b + t
+    # fixed level of government spending
+    ~ g = 0.2 * ySS
+    # fixed level of government debt
+    ~ b = ySS / qbSS
+
+    # Block monetary policy
+    # Taylor rule
+    ~ Rn = (RSS * ((pi/piSS)**phi_pi) * ((y/ySS)**phi_y))**(1 - rho) * RnLag**rho
+    # Interest rate setting rule
+    ~ R = max(1, Rn)
+
+    # Block exogenous shocks
+    ~ beta = betaSS*(betaLag / betaSS)**rho_beta * exp(e_beta)
+
+steady_state:
+  fixed_values:
+    # parameters:
+      theta: 6.
+      kappa: 0.975
+      psi: 59.11
+      delta: 0.025
+      alpha: 0.33
+      Phi: 5.6
+      phi_pi: 1.5
+      phi_y: 0.1
+      h: .44
+      rho: .8
+      eta: .33
+      rho_beta: .8
+      par_cap_util1: 0.8
+      omega: .44
+
+    # steady state
+      beta: 0.995
+      pi: 1.02^.25
+      n: 0.33
+      mc: (theta-1)/theta
+      q: 1.
+      pitilde: pi
+
+init_guesses:
+    chi: 1e+1
+    MPK: alpha*mc/20
