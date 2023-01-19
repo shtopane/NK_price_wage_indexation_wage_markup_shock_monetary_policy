@@ -14,15 +14,17 @@ definitions: |
 
 equations:
     #  + (psi_w/2 * (wPrime/wtilde - 1)**2) + log(w_markup)
-    ~ w = chi*(c - h*cLag)*y**eta + ((w_markup/(w_markup - 1)) * psi_w/2 * (w/wtildeLag - 1)**2)  # labor supply
+    ~ w = chi*(c - h*cLag)*y**eta + (psi_w/2 * (w/wtildeLag - 1)**2)  # labor supply
     
     # TODO: My Additions
     ~ wtilde = piSS ** w_omega * pi ** (1 - w_omega)
-    ~ pi_w = w/wLag
+    # ~ pi_w = w/wLag
 
     ~ 1 = R*betaPrime*(c - h*cLag)/(cPrime - h*c)/piPrime    # euler equation
     
-    ~ psi*(pi/pitildeLag - 1)*pi/pitildeLag = (1-theta) + theta * w + psi*betaPrime*(c-h*cLag)/(cPrime-h*c)*(piPrime/pitilde - 1)*piPrime/pitilde*yPrime/y # Phillips curve (Eq 5, Richter)
+    ~ psi*(pi/pitildeLag - 1)*pi/pitildeLag = (1-theta) + theta * (w**w_markup) + psi*betaPrime*(c-h*cLag)/(cPrime-h*c)*(piPrime/pitilde - 1)*piPrime/pitilde*yPrime/y # Phillips curve (Eq 5, Richter)
+    # TODO: My additions
+    ~ psi_w*(pi_w/wtildeLag - 1)*pi_w/wtildeLag = (1-theta) + theta * (w**w_markup) + psi_w*betaPrime*(c-h*cLag)/(cPrime-h*c)*(pi_wPrime/wtilde - 1)*pi_wPrime/wtilde # Phillips curve (Eq 5, Richter)
 
     ~ pitilde = piSS**omega * pi**(1-omega)
     
