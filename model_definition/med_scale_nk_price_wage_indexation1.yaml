@@ -68,13 +68,13 @@ equations:
     ~ hhdf = betaPrime*(c - h*cLag)/(cPrime - h*c)
     # FOC labor supply
     #  + (psi_w/2 * (w/wtildeLag - 1)**2)
-    ~ w = chi*n**eta*(c - h*cLag) - (psi_w/2 * (w/wtildeLag - 1)**2)
+    ~ w = chi*n**eta*(c - h*cLag) - (psi_w/2 * (w/wtilde - 1)**2)
 
     # TODO: Mine
     ~ wtilde = piSS ** w_omega * pi ** (1 - w_omega)
-    # ~ pi_w = w/wLag
     # euler equation
-    ~ 1 = R/piPrime*hhdf
+    # - chi * ((n**(1 + eta))/(1 + eta)) - (psi_w/2 * (w/wtilde - 1)**2)
+    ~ 1 = R/piPrime*hhdf 
     # budget constraint
     # (1 - w - (psi_w/2 * (w/wtildeLag - 1)**2))
     ~ dd + c + t + Phi/2*(i/iLag - 1)**2*i = w*n + RLag/pi*ddLag + (1 - mc - psi/2*(pi/pitildeLag - 1)**2)*y + (q*(1 - Phi/2*(i/iLag - 1)**2) - 1)*i + bprof
@@ -89,7 +89,7 @@ equations:
     ~ MPK = par_cap_util0 + par_cap_util1/(1-par_cap_util1)*(cap_util - 1)
     ~ MPK = alpha*mc*y/(cap_util*kLag)
     # TODO: Adding wage markup here solves the model at least
-    ~ ((w_markup - 1) / w_markup) * w = (1-alpha)*mc*y/n
+    ~ ((w_markup - 1) / w_markup + 1) * w = (1-alpha)*mc*y/n
     ~ q*Rk/piPrime = MPKPrime*cap_utilPrime + (1-delta)*qPrime - cap_util_costs
     
     # capital accumulation
@@ -101,7 +101,7 @@ equations:
     # TODO: wage PC
     # ~ psi_w*(pi_w/wtilde - 1)*pi_w/wtilde = (w_markup - 1 / w_markup) * w + psi_w*hhdf*(piPrime/wtildePrime - 1)*pi_wPrime/wtildePrime
     #~ psi_w*(pi_w/wtilde - 1)*pi_w/wtilde = psi_w*betaPrime*(pi_wPrime/wtildePrime - 1)*pi_wPrime/wtildePrime + n * hhdf * w_markup * (1 / (psi_w/2 * (w/wtildeLag - 1)**2)) * ((chi*(n**eta / hhdf)) - ((w_markup - 1 / w_markup) * w))
-    ~ psi_w*(pi_w/wtilde - 1)*pi_w/wtilde = psi_w*betaPrime*(pi_wPrime/wtildePrime - 1)*pi_wPrime/wtildePrime + n * hhdf * w_markup * (1 / (psi_w/2 * (w/wtildeLag - 1)**2)) * ((chi*(n**eta / hhdf)) - ((w_markup - 1) / w_markup) * w)
+    ~ psi_w*(pi_w/wtilde - 1)*pi_w/wtilde = psi_w*betaPrime*(pi_wPrime/wtildePrime - 1)*pi_wPrime/wtildePrime + n * hhdf * w_markup * (1 / (psi_w/2 * (w/wtilde - 1)**2)) * ((chi*(n**eta / hhdf)) - ((w_markup - 1) / w_markup + 1) * w)
 
     # price indexation term
     ~ pitilde = piSS**omega * pi**(1-omega)
