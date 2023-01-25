@@ -70,7 +70,7 @@ equations:
     # Wage indexation
     ~ wtilde = piSS ** w_omega * pi ** (1 - w_omega)
     # Wage inflation
-    ~ pi_w = w/wLag
+    ~ pi_w = w/wLag*pi
     # budget constraint
     # psi/2 * (pi / pitildeLag - 1)**2)*y - cost to adjusting price in period t (Gust, page 8)
     ~ dd + c + t + Phi/2 * (i / iLag - 1)**2 * i = (w * n) - (psi_w/2 * (w/wtilde - 1)**2) + RLag / pi * ddLag + (1 - mc - psi/2 * (pi / pitildeLag - 1)**2)*y + (q *(1 - Phi/2 * (i/iLag - 1)**2) - 1) * i + bprof
@@ -98,7 +98,7 @@ equations:
     # labor supply FOC
     #  ~ w = chi * n ** eta * (c - h * cLag) + log(w_markup)
 
-    ~ (pi_w/wtilde - 1)*pi_w/wtilde = (pi_wPrime/wtildePrime - 1)*pi_wPrime/wtildePrime + n/psi_w*(chi*n**eta/(1-w_markup) - hhdf*w*w_markup)
+    ~ (pi_w/wtilde - 1)*pi_w/wtilde = (pi_wPrime/wtildePrime - 1)*pi_wPrime/wtildePrime + n/psi_w*w_markup/(w_markup-1)*(chi*n**eta - hhdf*w/w_markup)
     # price indexation term
     ~ pitilde = piSS**omega * pi**(1 - omega)
     # production function
@@ -160,7 +160,7 @@ steady_state:
     n: 0.33
     mc: (theta-1)/theta
     q: 1.
-    # w_markup: 1.1 #6.
+    w_markup: 1.1 #6.
     pitilde: pi
     wtilde: pi
     hhdf: beta
