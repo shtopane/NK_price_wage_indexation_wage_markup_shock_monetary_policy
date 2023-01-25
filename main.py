@@ -1,52 +1,58 @@
+
 import econpizza as ep
+import numpy as np
 from grgrlib import *
+import copy
 
-# model file paths
-med_scale_nk_file = './model_definition/med_scale_nk.yaml'
+from variables_names_to_labels_map import variables_names_map_sorted
+
 med_scale_nk_price_wage_indexation_file = './model_definition/med_scale_nk_price_wage_indexation.yaml'
-small_scale_nk_price_indexation_file = './model_definition/nk_price_indexation.yaml'
-small_scale_nk_naive_wage_markup_file = './model_definition/nk_price_indexation_naive_wage_markup.yaml'
-# Solve Basic Medium model
-# med_scale_nk_mod: ep.PizzaModel = ep.load(med_scale_nk_file)
-# _ = med_scale_nk_mod.solve_stst()
+mod_dict0 = ep.parse(med_scale_nk_price_wage_indexation_file)
 
-med_scale_nk_price_wage_indexation_mod = ep.load(med_scale_nk_price_wage_indexation_file)
-# small_scale_nk_price_indexation_mod = ep.load(small_scale_nk_price_indexation_file)
+shocks = ('e_w', 0.1)
 
-# Smallest set of variables
-# base_variables = small_scale_nk_price_indexation_mod["variables"].copy()
-# Order the variables in the bigger model the same way
-# med_variables = med_scale_nk_price_wage_indexation_mod["variables"].copy()
-# index_of_small_scale_variables_in_med = [index for index, variable in enumerate(med_variables) if variable in base_variables]
+phi_y_list = [0.5, 1.0]
+phi_pi_list = [1., 2.0]
 
-# Solve small model with price indexation
-_  = med_scale_nk_price_wage_indexation_mod.solve_stst()
-# Solve model with Price indexation
-# _ = small_scale_nk_price_indexation_mod.solve_stst()
+def get_deviations_from_steady_state(org_stst, shocked_stst):
+    return (shocked_stst - org_stst)/org_stst * 100
 
-# Specify shock(beta)
-shocks = ('e_w', 0.01)
-
-# Shock the models and extract IRFs
-# small_scale_nk_price_indexation_x, _ = small_scale_nk_price_indexation_mod.find_path(shock = shocks)
-med_scale_nk_price_wage_indexation_x, _ = med_scale_nk_price_wage_indexation_mod.find_path(shock = shocks)
-
-# med_scale_labels = [med_variables[i] for i in index_of_small_scale_variables_in_med]
-# Plot
-# pplot(med_scale_nk_x[:30], labels = med_scale_nk_mod["variables"], title = "Basic Medium NK")
-# pplot(small_scale_nk_price_indexation_x[:30], labels = base_variables, title = "Price Indexation Small NK")
-pplot(med_scale_nk_price_wage_indexation_x[:30], labels = med_scale_nk_price_wage_indexation_mod["variables"], title = "Price Indexation Medium NK")
-plt.show()
-
-def get_med_scale_variables(small_nk_variables, med_nk_variables):
-    # Smallest set of variables
-    base_variables = small_nk_variables.copy()
-    # Order the variables in the bigger model the same way
-    med_variables = med_nk_variables.copy()
-    indexes = [index for index, variable in enumerate(med_variables) if variable in base_variables]
-    med_scale_labels = [med_variables[i] for i in indexes]
+def loop_over_phi_pi(mod_dict_org, shocks, parameter_values_list, param_name):
+    # solve original model
+    mod_org = ep.load(mod_dict_org)
+    param_value_org = mod_dict_org['steady_state']['fixed_values'][param_name]
+    _ = mod_org.solve_stst()
     
-    return (med_scale_labels, indexes)
+    mod_org_stst = np.fromiter(mod_org['stst'].values(), dtype = float)
+    
+    # shock original model
+    x_org, flag_org = mod_org.find_path(shock = shocks)
+    
+    models_tuple = ()
+    
+    for param_value in parameter_values_list:
+        mod_dict = copy.deepcopy(mod_dict_org)
+        mod_dict['steady_state']['fixed_values'][param_name] = param_value
+       
+        # solve copied model
+        mod = ep.load(mod_dict)
+        _ = mod.solve_stst()
+        
+        x, flag = mod.find_path(shock = shocks)
+        # Store IRFs
+        models_tuple = (*models_tuple, get_deviations_from_steady_state(mod_org_stst, x[:10]))
+    
+    figs, axs, _ = pplot((get_deviations_from_steady_state(mod_org_stst, x_org[:10]), *models_tuple), labels = list(variables_names_map_sorted.values()))
+    
+    # Add legend with values of the parameter(phi_y or phi_pi)
+    for ax in axs:
+        ax.legend([f'{param_name} = {param_value}' for param_value in [param_value_org, *parameter_values_list]])
+        ax.axhline(y=0.0, color='0.8', linestyle='--')
+    
+    # for index, fig in enumerate(figs):
+    #     fig.savefig(f'plots/over_parameters/{param_name}/figure{index+1}.png')
+    
+    plt.show()
 
-
-# eq = R*betaPrime*(c - h*cLag)/(cPrime - h*c)/piPrime -  (1 + (psi_w/2 * (wPrime/wtilde - 1)**2))
+# loop_over_phi_pi(mod_dict0, shocks, phi_y_list, 'phi_y')
+loop_over_phi_pi(mod_dict0, shocks, phi_pi_list, 'phi_pi')
