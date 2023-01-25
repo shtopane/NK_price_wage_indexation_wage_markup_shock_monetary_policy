@@ -14,6 +14,7 @@ variables: [
   Rk, # gross rental cost of capital
   beta, # discount factor
   w, # real wage(?)
+  w_markup, # wage mark up
   q, # value of capital in terms of consumption
   mc, # real marginal costs
   k, # capital
@@ -33,12 +34,13 @@ variables: [
   y_prod, # production (as per the production function)
   pitilde, # price change index (price indexation)
   wtilde, # wage change index (wage indexation)
-  # w_pi # wage inflation
+  pi_w # wage inflation
 ]
 parameters: [
   theta, # elasticity of demand
   kappa, # decay parameter for coupon payments of perpetual bonds
   psi, # parameter on the costs of price adjustment
+  psi_w, # parameter on the costs of wage adjustment
   delta, # depreciation rate
   alpha, # capital share
   Phi, # parameter on the capital/investment adjustment costs
@@ -48,13 +50,13 @@ parameters: [
   rho, # persistence in the Taylor rule
   eta, # inverse of Frisch elasticity of labor supply
   rho_beta, # persistence of the discount factor shock
+  rho_w, # persistence of the wage mark up shock
   chi, # affects the level of disutility from working (Gust, page 9)
   par_cap_util1, # parameter on the capital utilization costs
   omega, # parameter which determines the extent to which price indexation is tied to the central bank's inflation target or to the lagged inflation rate (Gust page 8)
   w_omega, # parameter which determines the extent to which wage indexation is tied to the central bank's inflation target or to the lagged inflation rate (Gust, same as price indexation I assume)
-  g_z # deterministic growth rate
 ]
-shocks: [e_beta]
+shocks: [e_beta, e_w]
 
 aux_equations: |
     par_cap_util0 = MPKSS
@@ -62,15 +64,17 @@ aux_equations: |
 equations:
     # Block households
     ~ hhdf = betaPrime * (c - h * cLag) / (cPrime - h * c)
-    # labor supply FOC
-    ~ w = chi * n ** eta * (c - h * cLag)
-     # Euler equation
-    ~ 1 = R / piPrime * hhdf
-    ~ wtilde = g_z * piSS ** w_omega * pi ** (1 - w_omega)
-    # budget constraint
-    ~ dd + c + t + Phi/2 * (i / iLag - 1)**2 * i = w * n + RLag / pi * ddLag + (1 - mc - psi/2 * (pi / pitildeLag - 1)**2)*y + (q *(1 - Phi/2 * (i/iLag - 1)**2) - 1) * i + bprof
-
     
+    # Euler equation
+    ~ 1 = R / piPrime * hhdf
+    # Wage indexation
+    ~ wtilde = piSS ** w_omega * pi ** (1 - w_omega)
+    # Wage inflation
+    ~ pi_w = w/wLag
+    # budget constraint
+    # psi/2 * (pi / pitildeLag - 1)**2)*y - cost to adjusting price in period t (Gust, page 8)
+    ~ dd + c + t + Phi/2 * (i / iLag - 1)**2 * i = (w * n) - (psi_w/2 * (w/wtilde - 1)**2) + RLag / pi * ddLag + (1 - mc - psi/2 * (pi / pitildeLag - 1)**2)*y + (q *(1 - Phi/2 * (i/iLag - 1)**2) - 1) * i + bprof
+
     # goods market clearing
     ~ c + i + g + Phi/2 * (i / iLag - 1)**2 * i + cap_util_costs*kLag = (1 - psi*(pi/pitildeLag - 1)**2/2)*y_prod
     # "effective output"
@@ -81,15 +85,20 @@ equations:
     ~ MPK = par_cap_util0 + par_cap_util1 / (1 - par_cap_util1) * (cap_util - 1)
     ~ MPK = alpha * mc * y / (cap_util * kLag)
     # MPL
-    ~ w = (1 - alpha) * mc * y / n
+    ~ log(w_markup) + w = (1 - alpha) * mc * y / n
     ~ q * Rk / piPrime = MPKPrime * cap_utilPrime + (1 - delta) * qPrime - cap_util_costs
 
     # capital accumulation
     ~ k = (1 - delta)*kLag + (1 - Phi/2 * (i/iLag - 1)**2)*i
     # capital Euler equations
     ~ 1 = q * (1 - Phi/2 * (i/iLag - 1)**2 - Phi * (i/iLag - 1)*i/iLag) + hhdf * qPrime * Phi * (iPrime/i - 1) * (iPrime/i)**2
-    # price Phillips curve[TODO: Add wage indexation here]
+    # price Phillips curve
     ~ psi * (pi/pitildeLag - 1)* pi/pitildeLag = (1 - theta) + theta * mc + psi * hhdf * (piPrime / pitilde - 1) * piPrime/pitilde * yPrime/y
+    
+    # labor supply FOC
+    #  ~ w = chi * n ** eta * (c - h * cLag) + log(w_markup)
+
+    ~ psi_w*(pi_w/wtilde - 1)*pi_w/wtilde = psi_w * hhdf * (pi_wPrime/wtildePrime - 1)*pi_wPrime/wtildePrime + (chi * n ** eta * (c - h * cLag)) - w/psi_w + log(w_markup)
     # price indexation term
     ~ pitilde = piSS**omega * pi**(1 - omega)
     # production function
@@ -121,35 +130,43 @@ equations:
 
     # Block exogenous shocks
     ~ beta = betaSS*(betaLag / betaSS)**rho_beta * exp(e_beta)
+    ~ w_markup = w_markupSS * (w_markupLag / w_markupSS)**rho_w * exp(e_w)
 
 steady_state:
   fixed_values:
     # parameters:
-      theta: 6.
-      kappa: 0.975
-      psi: 59.11
-      delta: 0.025
-      alpha: 0.33
-      Phi: 5.6
-      phi_pi: 1.5
-      phi_y: 0.1
-      h: .44
-      rho: .8
-      eta: .33
-      rho_beta: .8
-      par_cap_util1: 0.8
-      omega: .44
-      w_omega: .44
-      g_z: .5
+    theta: 6.
+    kappa: 0.975
+    psi: 59.11
+    psi_w: 59.11 # 2000
+    delta: 0.025
+    alpha: 0.33
+    Phi: 5.6
+    phi_pi: 1.5
+    phi_y: 0.1
+    h: .44
+    rho: .8
+    eta: .33
+    rho_beta: .8
+    rho_w: .8
+    par_cap_util1: 0.8
+    omega: .15
+    w_omega: .34
 
     # steady state
-      beta: 0.995
-      pi: 1.02^.25
-      n: 0.33
-      mc: (theta-1)/theta
-      q: 1.
-      pitilde: pi
-      # wtilde: w_pi
+    beta: 0.995
+    pi: 1. # 1.02^.25
+    pi_w: pi
+    n: 0.33
+    mc: (theta-1)/theta
+    q: 1.
+    # w_markup: 1.1 #6.
+    pitilde: pi
+    wtilde: pi
+    hhdf: beta
+    cap_util: 1.
+    R: pi/beta
+    Rn: R
 
   init_guesses:
     chi: 1e+1

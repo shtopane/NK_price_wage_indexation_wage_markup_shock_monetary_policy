@@ -2,7 +2,7 @@ import econpizza as ep
 from grgrlib import *
 
 # med_scale_nk_price_wage_indexation_file = './model_definition/med_scale_nk_price_wage_indexation1.yaml'
-med_scale_nk_price_wage_indexation_file = './model_definition/test3_wage_markup.yaml'
+med_scale_nk_price_wage_indexation_file = './model_definition/med_scale_nk_price_wage_indexation.yaml'
 # med_scale_nk_price_wage_indexation_file = './model_definition/med_scale_nk.yaml'
 
 
@@ -28,6 +28,7 @@ med_scale_nk_price_wage_indexation_x, _ = med_scale_nk_price_wage_indexation_mod
 index_of_b = med_scale_nk_price_wage_indexation_mod['variables'].index('b')
 print(med_scale_nk_price_wage_indexation_x[:30][index_of_b])
 print(med_scale_nk_price_wage_indexation_mod["variables"])
+
 figs, _ , _ = pplot(
     med_scale_nk_price_wage_indexation_x[:30], 
     labels = med_scale_nk_price_wage_indexation_mod["variables"], 
