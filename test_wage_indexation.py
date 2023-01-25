@@ -26,8 +26,9 @@ print('wage adjustment costs psi_w/2 * (w/wtilde - 1)**2', (psi_w/2 * (w/wtilde 
 print('b(should be around 0?)', med_scale_nk_price_wage_indexation_mod['stst']['b'])
 med_scale_nk_price_wage_indexation_x, _ = med_scale_nk_price_wage_indexation_mod.find_path(shock = shocks)
 index_of_b = med_scale_nk_price_wage_indexation_mod['variables'].index('b')
-print(med_scale_nk_price_wage_indexation_x[:30][index_of_b])
-print(med_scale_nk_price_wage_indexation_mod["variables"])
+index_of_pi = med_scale_nk_price_wage_indexation_mod['variables'].index('pitilde')
+# print(med_scale_nk_price_wage_indexation_x[:30][index_of_b])
+print(med_scale_nk_price_wage_indexation_x[:30][index_of_pi])
 
 figs, _ , _ = pplot(
     med_scale_nk_price_wage_indexation_x[:30], 
@@ -37,4 +38,4 @@ figs, _ , _ = pplot(
 plt.show()
 
 # for index, fig in enumerate(figs):
-#     fig.savefig(f'plot_{index}.png')
+#     fig.savefig(f'plots/version_2/plot_his_version_{index}.png')
