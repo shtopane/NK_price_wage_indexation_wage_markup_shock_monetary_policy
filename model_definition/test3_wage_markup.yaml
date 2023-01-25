@@ -73,7 +73,7 @@ equations:
     ~ pi_w = w/wLag
     # budget constraint
     # psi/2 * (pi / pitildeLag - 1)**2)*y - cost to adjusting price in period t (Gust, page 8)
-    ~ dd + c + t + Phi/2 * (i / iLag - 1)**2 * i = (w * n)  + RLag / pi * ddLag + (1 - mc - psi/2 * (pi / pitildeLag - 1)**2)*y + (q *(1 - Phi/2 * (i/iLag - 1)**2) - 1) * i + bprof
+    ~ dd + c + t + Phi/2 * (i / iLag - 1)**2 * i = (w * n) - (psi_w/2 * (w/wtilde - 1)**2) + RLag / pi * ddLag + (1 - mc - psi/2 * (pi / pitildeLag - 1)**2)*y + (q *(1 - Phi/2 * (i/iLag - 1)**2) - 1) * i + bprof
 
     # goods market clearing
     ~ c + i + g + Phi/2 * (i / iLag - 1)**2 * i + cap_util_costs*kLag = (1 - psi*(pi/pitildeLag - 1)**2/2)*y_prod
@@ -99,7 +99,7 @@ equations:
     # this is the wage? so add wage indexation here
    #  ~ w = chi * n ** eta * (c - h * cLag) + log(w_markup)
 
-    ~ psi_w*(pi_w/wtilde - 1)*pi_w/wtilde = psi_w * hhdf * (pi_wPrime/wtildePrime - 1)*pi_wPrime/wtildePrime + n * hhdf * (psi_w/2 * (w/wtilde - 1)**2) * (chi * n ** eta * (c - h * cLag)) + (log(w_markup) + w) - (psi_w/2 * (w/wtilde - 1)**2)
+    ~ psi_w*(pi_w/wtilde - 1)*pi_w/wtilde = psi_w * hhdf * (pi_wPrime/wtildePrime - 1)*pi_wPrime/wtildePrime + (chi * n ** eta * (c - h * cLag)) - w/psi_w + log(w_markup)
     # price indexation term
     ~ pitilde = piSS**omega * pi**(1 - omega)
     # production function
@@ -161,7 +161,7 @@ steady_state:
     n: 0.33
     mc: (theta-1)/theta
     q: 1.
-    w_markup: 1.1 #6.
+    # w_markup: 1.1 #6.
     pitilde: pi
     wtilde: pi
     hhdf: beta
