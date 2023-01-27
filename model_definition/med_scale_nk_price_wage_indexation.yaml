@@ -150,8 +150,8 @@ steady_state:
     rho_beta: .8
     rho_w: .8
     par_cap_util1: 0.8
-    omega: .15
-    w_omega: .34
+    omega: .85 # .44
+    w_omega: .66 # .34
 
     # steady state
     beta: 0.995
